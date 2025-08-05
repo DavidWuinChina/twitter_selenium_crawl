@@ -1,4 +1,4 @@
-# Twitter推文爬取工具
+# Twitter推文爬取工具(不需api)
 
 这是一个基于Selenium的Twitter推文爬取工具，可以自动搜索用户并获取其最新推文。
 
