@@ -114,7 +114,7 @@ result = search_service.search_user_and_get_tweets(username, max_tweets=50)
         "replies": "回复数",
         "views": "浏览数"
       },
-      "length": 字符数
+      "length": "字符数"
     }
   ]
 }
