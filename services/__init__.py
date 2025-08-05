@@ -3,6 +3,6 @@
 包含Twitter爬取相关的核心服务
 """
 
-from .twitter_service import TwitterScraperService
+from .twitter_search_service import TwitterSearchService
 
-__all__ = ['TwitterScraperService'] 
+__all__ = ['TwitterSearchService'] 
