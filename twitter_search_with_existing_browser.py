@@ -24,13 +24,6 @@ def main():
     print("=" * 60)
     
     # 目标用户列表
-    # target_usernames = [
-    #     "sunyuchentron",
-    #     "Defiqueen01",
-    #     "ApeCryptos",
-    #     "cryptodragon001",
-    #     "Grandellaa"
-    # ]
     target_usernames = [
         "sunyuchentron",
         "Defiqueen01",
@@ -79,6 +72,7 @@ def main():
                 user_info = result['user_info']
                 print(f"用户名: @{result['username']}")
                 print(f"显示名称: {user_info['display_name']}")
+                print(f"粉丝数: {user_info.get('followers_count', '0')}")
                 print(f"个人简介: {user_info['description']}")
                 print(f"位置: {user_info['location']}")
                 print(f"认证状态: {'是' if user_info['verified'] else '否'}")
@@ -199,6 +193,7 @@ def main():
                 formatted_user = {
                     "username": result['username'],
                     "display_name": user_info['display_name'],
+                    "followers": user_info.get('followers_count', '0'),
                     "description": user_info['description'],
                     "location": user_info['location'],
                     "verified": user_info['verified'],
@@ -223,6 +218,7 @@ def main():
                 for result in formatted_results:
                     f.write(f"用户名: @{result['username']}\n")
                     f.write(f"显示名称: {result['display_name']}\n")
+                    f.write(f"粉丝数: {result.get('followers', '0')}\n")
                     f.write(f"个人简介: {result['description']}\n")
                     f.write(f"位置: {result['location']}\n")
                     f.write(f"认证状态: {'是' if result['verified'] else '否'}\n")
