@@ -98,6 +98,7 @@ result = search_service.search_user_and_get_tweets(username, max_tweets=50)
 {
   "username": "用户名",
   "display_name": "显示名称",
+  "followers":"粉丝数",
   "description": "个人简介",
   "location": "位置",
   "verified": false,
