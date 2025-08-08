@@ -25,17 +25,20 @@ def main():
     
     # 目标用户列表
     target_usernames = [
-        "sunyuchentron",
-        "Defiqueen01",
-        "ApeCryptos",
-        "cryptodragon001",
-        "Grandellaa",
-        "CryptoAvenuee",
-        "CryptoAs_TW",
-        "specialist_005",
-        "9ali9__",
-        "CoinLabVerse"
-    ]
+    "Defiqueen01"
+]
+    # target_usernames = [
+    #     "sunyuchentron",
+    #     "Defiqueen01",
+    #     "ApeCryptos",
+    #     "cryptodragon001",
+    #     "Grandellaa",
+    #     "CryptoAvenuee",
+    #     "CryptoAs_TW",
+    #     "specialist_005",
+    #     "9ali9__",
+    #     "CoinLabVerse"
+    # ]
     
     print(f"开始搜索 {len(target_usernames)} 个用户...")
     print("请确保Chrome浏览器已打开并访问了 https://x.com/home")
