@@ -221,7 +221,7 @@ twitter_selenium_crawl/
 - 减小滑动幅度：每次滚动400像素，确保不遗漏推文
 - 增加滚动次数：最大500次滚动
 - 优化等待时间：每次滚动后等待2秒
-- 无新推文容忍度：连续50次无新推文才停止
+- 智能停止机制：连续50次无新推文自动停止滚动
 - 智能去重：自动识别和去除重复推文
 
 ### 用户信息提取
@@ -479,7 +479,7 @@ twitter_selenium_crawl/
 - Reduced scroll amplitude: 400 pixels per scroll to ensure no tweets are missed
 - Increased scroll count: maximum 500 scrolls
 - Optimized wait time: 2 seconds after each scroll
-- No new tweets tolerance: stops after 50 consecutive scrolls with no new tweets
+- Smart stop mechanism: automatically stops scrolling after 50 consecutive attempts with no new tweets
 - Smart deduplication: automatically identifies and removes duplicate tweets
 
 ### User Information Extraction

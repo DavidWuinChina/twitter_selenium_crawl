@@ -287,3 +287,45 @@ class DataProcessor:
                 return float(value_str)
             except:
                 return 0
+    
+    def calculate_retweet_ratio(self, tweets):
+        """
+        计算转发比例
+        
+        Args:
+            tweets (list): 推文列表，每个推文包含 is_retweet 字段
+        
+        Returns:
+            dict: 包含转发统计信息的字典
+        """
+        try:
+            if not tweets:
+                return {
+                    'total_tweets': 0,
+                    'retweet_count': 0,
+                    'original_count': 0,
+                    'retweet_ratio': 0.0
+                }
+            
+            total_tweets = len(tweets)
+            retweet_count = sum(1 for tweet in tweets if tweet.get('is_retweet', False))
+            original_count = total_tweets - retweet_count
+            
+            # 计算转发比例（保留2位小数）
+            retweet_ratio = round((retweet_count / total_tweets) * 100, 2) if total_tweets > 0 else 0.0
+            
+            return {
+                'total_tweets': total_tweets,
+                'retweet_count': retweet_count,
+                'original_count': original_count,
+                'retweet_ratio': retweet_ratio
+            }
+            
+        except Exception as e:
+            print(f"计算转发比例时出错: {str(e)}")
+            return {
+                'total_tweets': 0,
+                'retweet_count': 0,
+                'original_count': 0,
+                'retweet_ratio': 0.0
+            }

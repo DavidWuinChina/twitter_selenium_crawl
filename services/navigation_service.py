@@ -32,7 +32,7 @@ class NavigationService(BaseService):
             
             # 访问用户页面
             self.driver.get(user_url)
-            time.sleep(3)
+            time.sleep(3)  # 进一步优化页面加载等待时间到3秒
             
             print(f"✅ 已访问用户页面: {user_url}")
             return True
@@ -168,7 +168,7 @@ class NavigationService(BaseService):
                     # 直接访问用户页面
                     user_url = f"https://x.com/{username}"
                     self.driver.get(user_url)
-                    time.sleep(3)
+                    time.sleep(3)  # 进一步优化页面加载等待时间到3秒
                     print(f"✅ 已直接访问用户页面: {user_url}")
                     return True
                 except Exception as e:

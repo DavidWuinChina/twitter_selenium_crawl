@@ -11,6 +11,7 @@ import sys
 import os
 from datetime import datetime
 from services.twitter_search_service import TwitterSearchService
+from services.data_processor import DataProcessor
 import re # Added for date parsing
 
 def main():
@@ -25,7 +26,100 @@ def main():
     
     # 目标用户列表
     target_usernames = [
-    "Defiqueen01"
+    "mayoi_present_",
+    "besting_crypto",
+    "apipiro22",
+    "buritaro28",
+    "salmon_pi",
+    "3sa3sa3saki369",
+    "ngg_japan",
+    "nft_kusi",
+    "porucoin",
+    "narukiiinp",
+    "essan_enjoneer",
+    "DemonKingMinato",
+    "key_crypto0807",
+    "th_JPNFT",
+    "maru230815",
+    "umita_nft",
+    "YrYn5p",
+    "888marui",
+    "mika730730",
+    "chibikuro_qnq",
+    "f_f_auto",
+    "san_san_7979",
+    "Goz_NFT",
+    "mapupresident",
+    "Drai_nft",
+    "117_surf",
+    "nft_time_yeah",
+    "tororokusacoin",
+    "okuokushima",
+    "RHikouki",
+    "kohaharu45",
+    "mikky_8080",
+    "tail_top_",
+    "tomikasotu",
+    "yamoinv",
+    "rioixix",
+    "eri_3240",
+    "lick69696969",
+    "kenkenken6125",
+    "didpacchan",
+    "y_s_y_11",
+    "gyo_n",
+    "800_frontier",
+    "taka777SF",
+    "marugamefan",
+    "tamonex2000",
+    "tarchel_symbol",
+    "tyimutyimu1",
+    "gm_kohane",
+    "ULULU0807",
+    "laa_sts",
+    "nanaxbtc",
+    "harashowcom",
+    "zakky_web3",
+    "brubru_0714",
+    "tottyweb",
+    "takimi_NFT",
+    "goukun1234",
+    "NUUGUNDAM",
+    "000__no",
+    "yuichi_0111",
+    "nonchaaaan0808",
+    "Naolinkt",
+    "kaiwareunchi",
+    "nomasan_1991",
+    "kinako__mo_chi",
+    "haruta71011",
+    "yd59ktn",
+    "Coin_Slime_",
+    "xxxpink10xxx",
+    "zwugq5RmdnTdiRf",
+    "Com411Himitu",
+    "926_swd",
+    "mutikin10111005",
+    "kamomeshinkai",
+    "5kavlFAyZi6BeyO",
+    "kazu09812307",
+    "mirai50162247",
+    "goya4510",
+    "chiwawadoge",
+    "NFT_rurusyucom",
+    "Min__Michi",
+    "muramonta_",
+    "shu1nn",
+    "KoKota150",
+    "kings_Web3gamer",
+    "beardmen358",
+    "Papaemon_GT",
+    "Baaabu_6",
+    "cibinobu",
+    "Miao2020",
+    "vanity358",
+    "__milky8888",
+    "0120_FD"
 ]
     # target_usernames = [
     #     "sunyuchentron",
@@ -44,8 +138,11 @@ def main():
     print("请确保Chrome浏览器已打开并访问了 https://x.com/home")
     print("=" * 60)
     
+    # 是否启用转发检测调试模式（设置为True可以看到详细的检测过程）
+    debug_retweet_detection = True  # 启用调试模式验证日期过滤
+    
     # 创建Twitter搜索服务实例
-    search_service = TwitterSearchService(debug_port=9222)
+    search_service = TwitterSearchService(debug_port=9222, debug_retweet_detection=debug_retweet_detection)
     
     # 尝试连接到现有浏览器会话
     if not search_service.connect_to_browser():
@@ -59,6 +156,7 @@ def main():
     
     successful_users = []
     failed_users = []
+    skipped_users = []  # 因为粉丝数为0而跳过的用户
     
     try:
         for index, username in enumerate(target_usernames, 1):
@@ -69,6 +167,12 @@ def main():
             result = search_service.search_user_and_get_tweets(username, max_tweets=50)
             
             if result:
+                # 检查是否是因为粉丝数为0而跳过
+                if isinstance(result, dict) and result.get('error') == 'no_followers_info':
+                    skipped_users.append(username)
+                    continue
+                
+                # 正常处理成功的结果
                 successful_users.append(result)
                 
                 # 输出用户信息
@@ -81,11 +185,21 @@ def main():
                 print(f"认证状态: {'是' if user_info['verified'] else '否'}")
                 print(f"获取到推文数量: {result['tweets_count']}")
                 
+                # 计算并显示转发统计
+                data_processor = DataProcessor()
+                retweet_stats = data_processor.calculate_retweet_ratio(result['tweets'])
+                print(f"📊 转发统计:")
+                print(f"  总推文数: {retweet_stats['total_tweets']}")
+                print(f"  原创推文: {retweet_stats['original_count']}")
+                print(f"  转发推文: {retweet_stats['retweet_count']}")
+                print(f"  转发比例: {retweet_stats['retweet_ratio']}%")
+                
                 # 显示推文内容
                 if result['tweets']:
                     print(f"\n📝 获取到的推文（前5条）:")
                     for i, tweet in enumerate(result['tweets'][:5], 1):
-                        print(f"\n推文 {i} (日期: {tweet.get('date', '未知')}):")
+                        tweet_type = "🔄转发" if tweet.get('is_retweet', False) else "✏️原创"
+                        print(f"\n推文 {i} (日期: {tweet.get('date', '未知')}) [{tweet_type}]:")
                         print(f"内容: {tweet['text']}")
                         if tweet.get('interactions'):
                             print(f"互动: {tweet['interactions']}")
@@ -102,23 +216,31 @@ def main():
             
             # 添加延迟，避免请求过于频繁
             if index < len(target_usernames):
-                print(f"\n等待3秒后继续下一个用户... ({index}/{len(target_usernames)})")
-                time.sleep(3)
+                print(f"\n等待5秒后继续下一个用户... ({index}/{len(target_usernames)})")
+                time.sleep(5)  # 优化用户间等待时间到5秒
         
         # 总结报告
         print(f"\n{'='*60}")
         print("✅ 批量搜索完成！")
         print(f"成功搜索: {len(successful_users)} 个用户")
         print(f"失败搜索: {len(failed_users)} 个用户")
+        print(f"跳过用户: {len(skipped_users)} 个用户 (粉丝数为0)")
         
         if successful_users:
             print(f"\n✅ 成功的用户:")
             for user in successful_users:
-                print(f"- @{user['username']}: {user['user_info']['display_name']} (推文: {user['tweets_count']}条)")
+                data_processor = DataProcessor()
+                retweet_stats = data_processor.calculate_retweet_ratio(user['tweets'])
+                print(f"- @{user['username']}: {user['user_info']['display_name']} (推文: {user['tweets_count']}条, 转发比例: {retweet_stats['retweet_ratio']}%)")
         
         if failed_users:
             print(f"\n❌ 失败的用户:")
             for user in failed_users:
+                print(f"- @{user}")
+        
+        if skipped_users:
+            print(f"\n⏭️ 跳过的用户 (粉丝数为0):")
+            for user in skipped_users:
                 print(f"- @{user}")
         
         # 保存所有成功用户的数据
@@ -193,6 +315,10 @@ def main():
                 for i, tweet in enumerate(tweets, 1):
                     tweet['index'] = i
                 
+                # 计算转发比例
+                data_processor = DataProcessor()
+                retweet_stats = data_processor.calculate_retweet_ratio(tweets)
+                
                 formatted_user = {
                     "username": result['username'],
                     "display_name": user_info['display_name'],
@@ -203,7 +329,8 @@ def main():
                     "scraped_at": result['scraped_at'],
                     "url": f"https://twitter.com/{result['username']}",
                     "page_title": f"{user_info['display_name']} (@{result['username']}) / X",
-                    "recent_tweets": tweets
+                    "recent_tweets": tweets,
+                    "retweet_stats": retweet_stats
                 }
                 formatted_results.append(formatted_user)
             
@@ -227,10 +354,20 @@ def main():
                     f.write(f"认证状态: {'是' if result['verified'] else '否'}\n")
                     f.write(f"获取到推文数量: {len(result['recent_tweets'])}\n")
                     
+                    # 写入转发统计信息
+                    if 'retweet_stats' in result:
+                        stats = result['retweet_stats']
+                        f.write(f"转发统计:\n")
+                        f.write(f"  总推文数: {stats['total_tweets']}\n")
+                        f.write(f"  原创推文: {stats['original_count']}\n")
+                        f.write(f"  转发推文: {stats['retweet_count']}\n")
+                        f.write(f"  转发比例: {stats['retweet_ratio']}%\n")
+                    
                     if result['recent_tweets']:
                         f.write(f"\n推文内容:\n")
                         for tweet in result['recent_tweets']:
-                            f.write(f"\n推文 {tweet['index']} (日期: {tweet.get('date', '未知')}):\n")
+                            tweet_type = "转发" if tweet.get('is_retweet', False) else "原创"
+                            f.write(f"\n推文 {tweet['index']} (日期: {tweet.get('date', '未知')}) [类型: {tweet_type}]:\n")
                             f.write(f"内容: {tweet['text']}\n")
                             if tweet.get('interactions'):
                                 f.write(f"互动: {tweet['interactions']}\n")

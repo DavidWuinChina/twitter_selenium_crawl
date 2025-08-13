@@ -20,19 +20,20 @@ class TwitterSearchService(BaseService):
     整合导航、用户信息提取、推文提取等功能
     """
     
-    def __init__(self, debug_port=9222):
+    def __init__(self, debug_port=9222, debug_retweet_detection=False):
         """
         初始化Twitter搜索服务
         
         Args:
             debug_port (int): Chrome调试端口
+            debug_retweet_detection (bool): 是否启用转发检测调试模式
         """
         super().__init__(debug_port)
         
         # 初始化各个功能模块
         self.navigation = NavigationService(debug_port)
         self.user_extractor = UserInfoExtractor(debug_port)
-        self.tweet_extractor = TweetExtractor(debug_port)
+        self.tweet_extractor = TweetExtractor(debug_port, debug_retweet_detection)
     
     def search_user_and_get_tweets(self, username, max_tweets=50):
         """
@@ -61,7 +62,7 @@ class TwitterSearchService(BaseService):
                 return None
             
             # 等待用户页面加载
-            time.sleep(5)
+            time.sleep(3)  # 进一步优化页面加载等待时间到3秒
             
             # 验证是否导航到正确的用户页面
             if not self.navigation.verify_user_page(username):
@@ -74,8 +75,14 @@ class TwitterSearchService(BaseService):
             # 如果用户信息获取失败，尝试重新获取
             if user_info['display_name'] == '未知':
                 print("重新尝试获取用户信息...")
-                time.sleep(2)
+                time.sleep(2)  # 进一步优化重试等待时间到2秒
                 user_info = self.user_extractor.extract_user_info(username)
+            
+            # 检查是否获取到了粉丝信息
+            followers_count = user_info.get('followers_count', 0)
+            if followers_count == 0:
+                print(f"⚠️ 用户 @{username} 未获取到粉丝信息，停止处理该用户")
+                return {'error': 'no_followers_info', 'username': username}
             
             # 获取推文
             tweets = self.tweet_extractor.get_user_tweets(max_tweets)
