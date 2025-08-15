@@ -22,7 +22,14 @@ class TweetExtractor(BaseService):
         self.data_processor = DataProcessor()
         self.debug_retweet_detection = debug_retweet_detection
     
-    def get_user_tweets(self, max_tweets=50):
+    def get_user_tweets(
+        self,
+        max_tweets=50,
+        wait_until_reach=True,
+        max_total_wait_seconds=600,
+        max_scroll_attempts=1000,
+        max_no_new_tweets=200,
+    ):
         """
         获取用户推文
         
@@ -30,20 +37,20 @@ class TweetExtractor(BaseService):
             max_tweets (int): 最大推文数量
         
         Returns:
-            list: 推文列表
+            list: 推文列表（去重策略：文本+是否转发 作为唯一键；因此同文本的原创与转发会“都保留”）
         """
         tweets = []
-        seen_tweets = set()  # 用于去重
+        seen_tweet_keys = set()  # (tweet_text, is_retweet) 作为唯一键，原创与转发可共存
         try:
             print(f"开始获取用户推文，目标数量: {max_tweets}")
             
             # 多次滚动获取推文
             scroll_attempts = 0
-            max_scroll_attempts = 50  # 增加最大滚动次数
             no_new_tweets_count = 0  # 连续无新推文计数器
-            max_no_new_tweets = 50  # 连续50次无新推文才停止
+            start_time = time.time()
             
-            while len(tweets) < max_tweets and scroll_attempts < max_scroll_attempts:
+            # 当 wait_until_reach 为 True 时，将尽可能达到目标数量，直到超时或达到滚动/无新推文上限
+            while True:
                 # 查找推文元素
                 tweet_elements = self._find_tweet_elements()
                 
@@ -51,17 +58,31 @@ class TweetExtractor(BaseService):
                     print("未找到推文元素，等待页面加载...")
                     time.sleep(3)  # 优化等待时间到3秒
                     scroll_attempts += 1
+                    # 终止条件检查
+                    if self._should_stop(len(tweets), max_tweets, wait_until_reach, start_time, max_total_wait_seconds, scroll_attempts, max_scroll_attempts, no_new_tweets_count, max_no_new_tweets):
+                        break
                     continue
                 
-                # 提取新推文
-                new_tweets = self._extract_tweets_from_elements_with_dedup(
-                    tweet_elements, seen_tweets, max_tweets - len(tweets)
-                )
-                
-                if new_tweets:
-                    tweets.extend(new_tweets)
-                    print(f"当前已获取 {len(tweets)} 条有效推文（目标: {max_tweets}）")
-                    no_new_tweets_count = 0  # 重置计数器
+                # 提取推文（不去重），统一在此处聚合并做“原创优先”去重
+                extracted = self._extract_tweets_from_elements(tweet_elements)
+                added_count = 0
+                for tweet_data in extracted:
+                    if len(tweets) >= max_tweets:
+                        break
+                    tweet_text = tweet_data.get('text', '')
+                    if not tweet_text:
+                        continue
+                    is_retweet = tweet_data.get('is_retweet', False)
+                    key = (tweet_text, bool(is_retweet))
+                    if key in seen_tweet_keys:
+                        continue
+                    tweets.append(tweet_data)
+                    seen_tweet_keys.add(key)
+                    added_count += 1
+
+                if added_count > 0:
+                    print(f"当前已获取 {len(tweets)} 条有效推文（目标: {max_tweets}），新加 {added_count} 条")
+                    no_new_tweets_count = 0
                 else:
                     no_new_tweets_count += 1
                     print(f"未发现新推文，继续滚动... (连续{no_new_tweets_count}次)")
@@ -71,17 +92,80 @@ class TweetExtractor(BaseService):
                 time.sleep(2)  # 调整滚动后等待时间到2秒
                 scroll_attempts += 1
                 
-                # 如果连续多次没有新推文，停止
-                if no_new_tweets_count >= max_no_new_tweets:
-                    print(f"连续{max_no_new_tweets}次未获取到新推文，停止滚动")
+                # 终止条件检查
+                if self._should_stop(len(tweets), max_tweets, wait_until_reach, start_time, max_total_wait_seconds, scroll_attempts, max_scroll_attempts, no_new_tweets_count, max_no_new_tweets):
                     break
             
+            # 重新编号index
+            for i, t in enumerate(tweets, 1):
+                t['index'] = i
             print(f"推文获取完成，总计: {len(tweets)} 条")
             return tweets
             
         except Exception as e:
             print(f"获取用户推文时出错: {str(e)}")
             return tweets
+
+    def _extract_tweets_from_elements(self, tweet_elements):
+        """从推文元素中提取数据（不做去重），保留24小时过滤逻辑"""
+        new_tweets = []
+        filtered_count = 0
+        duplicate_count = 0  # 不使用，但保留计数字段占位
+
+        for tweet_element in tweet_elements:
+            tweet_data = self._extract_tweet_data(tweet_element)
+            if not tweet_data:
+                filtered_count += 1
+                continue
+            new_tweets.append(tweet_data)
+
+        if self.debug_retweet_detection and (filtered_count > 0 or duplicate_count > 0):
+            print(f"    📊 本轮统计: 新增{len(new_tweets)}条, 过滤{filtered_count}条(24h内), 重复{duplicate_count}条")
+        return new_tweets
+
+    def _should_stop(self, current_count, target_count, wait_until_reach, start_time,
+                      max_total_wait_seconds, scroll_attempts, max_scroll_attempts,
+                      no_new_tweets_count, max_no_new_tweets):
+        """统一的终止条件判定"""
+        # 达标直接停止
+        if current_count >= target_count:
+            return True
+        
+        # 如果不要求强制达到目标，遵循原有上限
+        if not wait_until_reach:
+            if scroll_attempts >= max_scroll_attempts:
+                print(f"达到最大滚动次数 {max_scroll_attempts}，停止")
+                return True
+            if no_new_tweets_count >= max_no_new_tweets:
+                print(f"连续{max_no_new_tweets}次未获取到新推文，停止滚动")
+                return True
+            return False
+        
+        # 需要尽量达到目标：放宽终止条件，但仍设置防护阈值
+        elapsed = time.time() - start_time
+        if elapsed >= max_total_wait_seconds:
+            print(f"等待时间已达上限 {max_total_wait_seconds}s，当前获取 {current_count}/{target_count}，停止")
+            return True
+        if scroll_attempts >= max_scroll_attempts:
+            print(f"滚动次数达到上限 {max_scroll_attempts}，当前获取 {current_count}/{target_count}，停止")
+            return True
+        if no_new_tweets_count >= max_no_new_tweets:
+            print(f"连续{max_no_new_tweets}次无新增，可能到底或加载失败，当前获取 {current_count}/{target_count}，停止")
+            return True
+        
+        # 可选：检测是否到达时间线底部（弱检测）
+        try:
+            page_text = self.driver.find_element(By.TAG_NAME, 'body').text
+            end_markers = [
+                'No more Tweets', 'You’re all caught up', '没有更多', '没有更多推文', '没有更多结果', '没有结果'
+            ]
+            if any(marker in page_text for marker in end_markers):
+                print(f"似乎到达时间线底部，当前获取 {current_count}/{target_count}，停止")
+                return True
+        except Exception:
+            pass
+        
+        return False
 
     def _find_tweet_elements(self):
         """查找推文元素"""

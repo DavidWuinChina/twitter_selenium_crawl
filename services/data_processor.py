@@ -15,11 +15,12 @@ class DataProcessor:
     def extract_tweet_date(self, full_text):
         """提取推文日期"""
         try:
+            # 更严格的英文月份匹配，避免误匹配诸如 "oon 26"（来自"Moon 26"之类单词尾部）
+            month_en = r'(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)'
             date_patterns = [
                 r'·\s*(\d{1,2}月\d{1,2}日)',
                 r'·\s*(\d{4}年\d{1,2}月\d{1,2}日)',
-                r'·\s*([A-Za-z]{3}\s+\d+)',
-                r'·\s*([A-Za-z]{3}\s+\d+,\s+\d{4})',
+                rf'·\s*(\b{month_en}\s+\d{{1,2}}(?:,\s*\d{{4}})?)\b',
                 r'·\s*(\d{1,2}/\d{1,2})',
                 r'·\s*(\d{1,2}/\d{1,2}/\d{4})',
                 r'·\s*(\d{1,2}-\d{1,2})',
@@ -29,8 +30,7 @@ class DataProcessor:
                 # 不带点的格式
                 r'(\d{1,2}月\d{1,2}日)',
                 r'(\d{4}年\d{1,2}月\d{1,2}日)',
-                r'([A-Za-z]{3}\s+\d+)',
-                r'([A-Za-z]{3}\s+\d+,\s+\d{4})',
+                rf'(\b{month_en}\s+\d{{1,2}}(?:,\s*\d{{4}})?)\b',
                 r'(\d{1,2}/\d{1,2})',
                 r'(\d{1,2}/\d{1,2}/\d{4})',
                 r'(\d{1,2}-\d{1,2})',
@@ -51,11 +51,11 @@ class DataProcessor:
     def extract_interactions(self, full_text):
         """提取互动数据 - 改进版本"""
         try:
+            month_en = r'(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)'
             # 移除日期部分
             date_removed = re.sub(r'·\s*(\d{1,2}月\d{1,2}日)', '', full_text)
             date_removed = re.sub(r'·\s*(\d{4}年\d{1,2}月\d{1,2}日)', '', date_removed)
-            date_removed = re.sub(r'·\s*([A-Za-z]{3}\s+\d+)', '', date_removed)
-            date_removed = re.sub(r'·\s*([A-Za-z]{3}\s+\d+,\s+\d{4})', '', date_removed)
+            date_removed = re.sub(rf'·\s*(\b{month_en}\s+\d{{1,2}}(?:,\s*\d{{4}})?)\b', '', date_removed)
             
             # 提取数字 - 改进的正则表达式
             numbers = re.findall(r'(\d+(?:\.\d+)?[KMB万]?)', date_removed)

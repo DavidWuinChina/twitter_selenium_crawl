@@ -25,114 +25,114 @@ def main():
     print("=" * 60)
     
     # 目标用户列表
+#     target_usernames = [
+#     "mayoi_present_",
+#     "besting_crypto",
+#     "apipiro22",
+#     "buritaro28",
+#     "salmon_pi",
+#     "3sa3sa3saki369",
+#     "ngg_japan",
+#     "nft_kusi",
+#     "porucoin",
+#     "narukiiinp",
+#     "essan_enjoneer",
+#     "DemonKingMinato",
+#     "key_crypto0807",
+#     "th_JPNFT",
+#     "maru230815",
+#     "umita_nft",
+#     "YrYn5p",
+#     "888marui",
+#     "mika730730",
+#     "chibikuro_qnq",
+#     "f_f_auto",
+#     "san_san_7979",
+#     "Goz_NFT",
+#     "mapupresident",
+#     "Drai_nft",
+#     "117_surf",
+#     "nft_time_yeah",
+#     "tororokusacoin",
+#     "okuokushima",
+#     "RHikouki",
+#     "kohaharu45",
+#     "mikky_8080",
+#     "tail_top_",
+#     "tomikasotu",
+#     "yamoinv",
+#     "rioixix",
+#     "eri_3240",
+#     "lick69696969",
+#     "kenkenken6125",
+#     "didpacchan",
+#     "y_s_y_11",
+#     "gyo_n",
+#     "800_frontier",
+#     "taka777SF",
+#     "marugamefan",
+#     "tamonex2000",
+#     "tarchel_symbol",
+#     "tyimutyimu1",
+#     "gm_kohane",
+#     "ULULU0807",
+#     "laa_sts",
+#     "nanaxbtc",
+#     "harashowcom",
+#     "zakky_web3",
+#     "brubru_0714",
+#     "tottyweb",
+#     "takimi_NFT",
+#     "goukun1234",
+#     "NUUGUNDAM",
+#     "000__no",
+#     "yuichi_0111",
+#     "nonchaaaan0808",
+#     "Naolinkt",
+#     "kaiwareunchi",
+#     "nomasan_1991",
+#     "kinako__mo_chi",
+#     "haruta71011",
+#     "yd59ktn",
+#     "Coin_Slime_",
+#     "xxxpink10xxx",
+#     "zwugq5RmdnTdiRf",
+#     "Com411Himitu",
+#     "926_swd",
+#     "mutikin10111005",
+#     "kamomeshinkai",
+#     "5kavlFAyZi6BeyO",
+#     "kazu09812307",
+#     "mirai50162247",
+#     "goya4510",
+#     "chiwawadoge",
+#     "NFT_rurusyucom",
+#     "Min__Michi",
+#     "muramonta_",
+#     "shu1nn",
+#     "KoKota150",
+#     "kings_Web3gamer",
+#     "beardmen358",
+#     "Papaemon_GT",
+#     "Baaabu_6",
+#     "cibinobu",
+#     "Miao2020",
+#     "vanity358",
+#     "__milky8888",
+#     "0120_FD"
+# ]
     target_usernames = [
-    "mayoi_present_",
-    "besting_crypto",
-    "apipiro22",
-    "buritaro28",
-    "salmon_pi",
-    "3sa3sa3saki369",
-    "ngg_japan",
-    "nft_kusi",
-    "porucoin",
-    "narukiiinp",
-    "essan_enjoneer",
-    "DemonKingMinato",
-    "key_crypto0807",
-    "th_JPNFT",
-    "maru230815",
-    "umita_nft",
-    "YrYn5p",
-    "888marui",
-    "mika730730",
-    "chibikuro_qnq",
-    "f_f_auto",
-    "san_san_7979",
-    "Goz_NFT",
-    "mapupresident",
-    "Drai_nft",
-    "117_surf",
-    "nft_time_yeah",
-    "tororokusacoin",
-    "okuokushima",
-    "RHikouki",
-    "kohaharu45",
-    "mikky_8080",
-    "tail_top_",
-    "tomikasotu",
-    "yamoinv",
-    "rioixix",
-    "eri_3240",
-    "lick69696969",
-    "kenkenken6125",
-    "didpacchan",
-    "y_s_y_11",
-    "gyo_n",
-    "800_frontier",
-    "taka777SF",
-    "marugamefan",
-    "tamonex2000",
-    "tarchel_symbol",
-    "tyimutyimu1",
-    "gm_kohane",
-    "ULULU0807",
-    "laa_sts",
-    "nanaxbtc",
-    "harashowcom",
-    "zakky_web3",
-    "brubru_0714",
-    "tottyweb",
-    "takimi_NFT",
-    "goukun1234",
-    "NUUGUNDAM",
-    "000__no",
-    "yuichi_0111",
-    "nonchaaaan0808",
-    "Naolinkt",
-    "kaiwareunchi",
-    "nomasan_1991",
-    "kinako__mo_chi",
-    "haruta71011",
-    "yd59ktn",
-    "Coin_Slime_",
-    "xxxpink10xxx",
-    "zwugq5RmdnTdiRf",
-    "Com411Himitu",
-    "926_swd",
-    "mutikin10111005",
-    "kamomeshinkai",
-    "5kavlFAyZi6BeyO",
-    "kazu09812307",
-    "mirai50162247",
-    "goya4510",
-    "chiwawadoge",
-    "NFT_rurusyucom",
-    "Min__Michi",
-    "muramonta_",
-    "shu1nn",
-    "KoKota150",
-    "kings_Web3gamer",
-    "beardmen358",
-    "Papaemon_GT",
-    "Baaabu_6",
-    "cibinobu",
-    "Miao2020",
-    "vanity358",
-    "__milky8888",
-    "0120_FD"
-]
-    # target_usernames = [
-    #     "sunyuchentron",
-    #     "Defiqueen01",
-    #     "ApeCryptos",
-    #     "cryptodragon001",
-    #     "Grandellaa",
-    #     "CryptoAvenuee",
-    #     "CryptoAs_TW",
-    #     "specialist_005",
-    #     "9ali9__",
-    #     "CoinLabVerse"
-    # ]
+        "sunyuchentron",
+        "Defiqueen01",
+        "ApeCryptos",
+        "cryptodragon001",
+        "Grandellaa",
+        "CryptoAvenuee",
+        "CryptoAs_TW",
+        "specialist_005",
+        "9ali9__",
+        "CoinLabVerse"
+    ]
     
     print(f"开始搜索 {len(target_usernames)} 个用户...")
     print("请确保Chrome浏览器已打开并访问了 https://x.com/home")
@@ -157,6 +157,7 @@ def main():
     successful_users = []
     failed_users = []
     skipped_users = []  # 因为粉丝数为0而跳过的用户
+    insufficient_users = []  # 未达到50条的用户
     
     try:
         for index, username in enumerate(target_usernames, 1):
@@ -174,6 +175,8 @@ def main():
                 
                 # 正常处理成功的结果
                 successful_users.append(result)
+                if result.get('tweets_count', 0) < 50:
+                    insufficient_users.append((username, result.get('tweets_count', 0)))
                 
                 # 输出用户信息
                 user_info = result['user_info']
@@ -225,6 +228,10 @@ def main():
         print(f"成功搜索: {len(successful_users)} 个用户")
         print(f"失败搜索: {len(failed_users)} 个用户")
         print(f"跳过用户: {len(skipped_users)} 个用户 (粉丝数为0)")
+        if insufficient_users:
+            print("\n⚠️ 未达到50条推文的用户:")
+            for uname, cnt in insufficient_users:
+                print(f"- @{uname}: {cnt} 条")
         
         if successful_users:
             print(f"\n✅ 成功的用户:")
@@ -344,6 +351,11 @@ def main():
             with open(txt_filename, 'w', encoding='utf-8') as f:
                 f.write(f"Twitter搜索结果 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
                 f.write("=" * 60 + "\n\n")
+                if insufficient_users:
+                    f.write("未达到50条推文的用户:\n")
+                    for uname, cnt in insufficient_users:
+                        f.write(f"- @{uname}: {cnt} 条\n")
+                    f.write("\n")
                 
                 for result in formatted_results:
                     f.write(f"用户名: @{result['username']}\n")

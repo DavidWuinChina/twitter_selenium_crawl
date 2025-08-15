@@ -19,6 +19,14 @@
 - 📅 智能排序：已知日期推文按时间排序，未知日期放在最后
 - 🏗️ 模块化架构：功能分离，易于维护和扩展
 
+### 近期更新（重要）
+
+- ✅ 不足50条会持续尝试：默认开启“尽量凑够50条”，直到达到目标或命中保护阈值（总等待600s/最多滚动1000次/连续200次无新增）。
+- ✅ 去重策略调整：以“文本 + 是否转发”为唯一键，因此同一文本的原创与转发会“都保留”（解决先原创后自转发被覆盖的问题）。
+- ✅ 日期识别更严格：修复英文月份误匹配，避免出现“oon 26”“all 33”这类残片日期。
+- ✅ 结果汇总增强：批处理结束会在控制台和 `results/twitter_users_data.txt` 顶部列出“未达到50条”的账号清单。
+- ✅ 提供校验脚本：`scripts/check_recent_tweet_counts.py` 可快速统计各账号的条数分布与未达标账号。
+
 ## 系统要求
 
 - **操作系统**: Windows 10/11
@@ -100,12 +108,35 @@ target_usernames = [
 result = search_service.search_user_and_get_tweets(username, max_tweets=50)
 ```
 
+高级参数（在内部已启用“尽量凑够50条”策略，如需调整阈值可在代码中修改）：
+
+```python
+# services/twitter_search_service.py 内部调用（默认值）
+tweets = self.tweet_extractor.get_user_tweets(
+    max_tweets=50,
+    wait_until_reach=True,
+    max_total_wait_seconds=600,   # 总等待时间上限（秒）
+    max_scroll_attempts=1000,     # 最大滚动次数
+    max_no_new_tweets=200         # 连续无新增上限
+)
+```
+
 ## 输出文件
 
 程序运行完成后，会在 `results/` 目录下生成：
 
 - `twitter_users_data.json` - JSON格式的完整数据
 - `twitter_users_data.txt` - 可读的文本格式
+
+同时在程序末尾会输出“未达到50条”的账号，并写入 `twitter_users_data.txt` 顶部，便于快速复查。
+
+### 结果校验脚本（可选）
+
+```bash
+python scripts/check_recent_tweet_counts.py
+```
+
+功能：统计每位用户 `recent_tweets` 的数量分布，并列出未达标（<50）账号。
 
 ### 数据格式
 
@@ -163,6 +194,7 @@ result = search_service.search_user_and_get_tweets(username, max_tweets=50)
 - 检查网络连接
 - 增加等待时间
 - 重新运行程序
+- 如需包含24小时内推文，可在 `services/tweet_extractor.py` 中调整或取消相关过滤逻辑（搜索 `_is_today_tweet` 与其调用处）
 
 ### 问题4：排序问题
 
@@ -218,11 +250,11 @@ twitter_selenium_crawl/
 - **错误隔离**: 模块间相对独立，问题不会传播
 
 ### 推文获取优化
-- 减小滑动幅度：每次滚动400像素，确保不遗漏推文
-- 增加滚动次数：最大500次滚动
-- 优化等待时间：每次滚动后等待2秒
-- 智能停止机制：连续50次无新推文自动停止滚动
-- 智能去重：自动识别和去除重复推文
+- 滚动幅度：每次滚动600像素
+- 滚动上限：最大1000次滚动
+- 等待时间：每次滚动后等待2秒
+- 持续尝试：不足50条时继续尝试，直到达标或命中保护阈值（总等待600s/连续无新增200次/滚动1000次）
+- 去重策略：以“文本 + 是否转发”为唯一键，原创与转发可共存
 
 ### 用户信息提取
 - 完整的用户资料：显示名称、用户名、粉丝数、简介等
@@ -232,6 +264,7 @@ twitter_selenium_crawl/
 
 ### 日期识别优化
 - 支持多种日期格式：中文日期、英文缩写、相对时间等
+- 修复英文月份误匹配，避免将普通单词尾部误识别为日期（如“oon 26”）
 - 改进排序逻辑：智能排序确保时间顺序正确
 - 未知日期处理：统一放在最后，避免排序混乱
 

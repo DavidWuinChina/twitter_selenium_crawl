@@ -84,8 +84,14 @@ class TwitterSearchService(BaseService):
                 print(f"⚠️ 用户 @{username} 未获取到粉丝信息，停止处理该用户")
                 return {'error': 'no_followers_info', 'username': username}
             
-            # 获取推文
-            tweets = self.tweet_extractor.get_user_tweets(max_tweets)
+            # 获取推文：不足50时会继续尝试，直到达标或达到保护阈值
+            tweets = self.tweet_extractor.get_user_tweets(
+                max_tweets=max_tweets,
+                wait_until_reach=True,
+                max_total_wait_seconds=600,
+                max_scroll_attempts=1000,
+                max_no_new_tweets=200,
+            )
             
             # 合并数据
             result = {
